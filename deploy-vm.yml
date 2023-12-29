@@ -1,0 +1,55 @@
+- hosts: localhost
+  tasks:
+    - name: upload custom ISO to the vSphere datastore
+      community.vmware.vsphere_copy:
+        hostname: "vcenter.lab.local"
+        username: "{{ vcenter_username }}"
+        password: "{{ vcenter_password }}"
+        datacenter: "test_datacenter"
+        validate_certs: no
+        src: "./cloudinit.iso" 
+        datastore: "DS_ISO_LUN_001"
+        path: "/ISOs/cloudinit.iso"
+        timeout: 30
+    - name: deploy Fortigate VM
+      community.vmware.vmware_deploy_ovf:
+        hostname: "vcenter.lab.local"
+        username: "{{ vcenter_username }}"
+        password: "{{ vcenter_password }}"
+        datacenter: "test_datacenter"
+        folder: "/test_datacenter/vm/XXXX/XXXXX"
+        validate_certs: no
+        cluster: "test-cluster01"
+        datastore: "DS_VM_LUN_002"
+        name: "TEST-FWL-001"
+        ova: "fortigate.ova"
+        networks: 
+          "{u'Network 1':u'vlan1-portgroup',u'Network 2':u'vlan2-portgroup',u'Network 3':u'vlan3-portgroup',u'Network 4':u'vlan1-portgroup',u'Network 5':u'vlan1-portgroup', u'Network 6':u'vlan1-portgroup', u'Network 7':u'vlan1-portgroup',u'Network 8':u'vlan1-portgroup',u'Network 9':u'vlan1-portgroup',u'Network 10':u'vlan1-portgroup'}"
+        power_on: no
+    - name: attach cloudinit.iso and set vm specs
+      community.vmware.vmware_guest:
+        hostname: "vcenter.lab.local"
+        username: "{{ vcenter_username }}"
+        password: "{{ vcenter_password }}"
+        datacenter: "test_datacenter"
+        name: "TEST-FWL-001"
+        validate_certs: no
+        cdrom:
+          - controller_number: 0
+            unit_number: 0
+            type: iso
+            iso_path: "[DS_ISO_LUN_001] /ISOs/cloudinit.iso"
+            state: present
+        hardware: 
+            memory_mb: "4096"
+            num_cpus: "6"
+            num_cpu_cores_per_socket: "3"
+    - name: power-on vm
+      community.vmware.vmware_guest:
+        hostname: "vcenter.lab.local"
+        username: "{{ vcenter_username }}"
+        password: "{{ vcenter_password }}"
+        datacenter: "test_datacenter"
+        name: "TEST-FWL-001"
+        validate_certs: no
+        state: poweredon

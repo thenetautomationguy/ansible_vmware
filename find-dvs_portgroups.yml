@@ -1,0 +1,16 @@
+- hosts: localhost
+  tasks:
+    - name: get all portgroups from dvswitch {{ name_dvswitch }}
+      community.vmware.vmware_dvs_portgroup_find:
+        hostname: "{{ vcenter_hostname }}"
+        username: "{{ vcenter_username }}"
+        password: "{{ vcenter_password }}"
+        dvswitch: '{{ name_dvswitch }}'
+      delegate_to: localhost
+    - name: check if VLAN {{ vlan_id }} is present
+      community.vmware.vmware_dvs_portgroup_find:
+        hostname: "{{ vcenter_hostname }}"
+        username: "{{ vcenter_username }}"
+        password: "{{ vcenter_password }}"
+        vlanid: "{{ vlan_id }}"
+      delegate_to: localhost

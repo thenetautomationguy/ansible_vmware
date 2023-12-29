@@ -1,0 +1,14 @@
+- hosts: localhost
+  tasks:
+    - name: locate the vm folder
+      vmware_guest_find:
+        hostname: "{{ vcenter_hostname }}"
+        username: "{{ vcenter_username }}"
+        password: "{{ vcenter_passowrd }}"
+        validate_certs: False
+        name: "{{vm_name}}"
+      delegate_to: localhost
+      register: vm_facts
+    - name: show vm_facts
+      debug:
+        msg: "{{vm_facts}}"
